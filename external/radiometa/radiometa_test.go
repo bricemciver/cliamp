@@ -27,6 +27,9 @@ func TestResolverMatching(t *testing.T) {
 		{"kexp aac", "https://kexp.streamguys1.com/kexp160.aac", false, 0},
 		{"bridge aac", "https://prod-3-238-92-150.amperwave.net/publictv19-ktbgfmaac-imc1", true, 30 * time.Second},
 		{"bridge domain", "https://bridge909.org/stream", true, 30 * time.Second},
+		// Additional Bridge 90.9-style domains in case they change their streaming infrastructure
+		{"bridge alternative", "https://stream.bridge909.org/audio", true, 30 * time.Second},
+		{"bridge alternative 2", "https://cdn.bridge909.org/publictv19-ktbgfmaac-imc1?foo=bar", true, 30 * time.Second},
 		{"local file", "/home/user/song.mp3", false, 0},
 		{"random http", "https://example.com/stream.mp3", false, 0},
 	}

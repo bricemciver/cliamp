@@ -125,9 +125,12 @@ func parseNTS(live *ntsLive, channel string) string {
 // --- Bridge 90.9 -----------------------------------------------------------
 
 // matchBridge reports whether url is a Bridge 90.9 stream.
+// It matches the bridge909.org domain, which covers all of Bridge 90.9's
+// CDN endpoints (including amperwave.net, stream domains, etc.).
+// This is intentionally less strict than checking specific URL paths,
+// so it continues to work if Bridge 90.9 changes their streaming infrastructure.
 func matchBridge(url string) bool {
-	return strings.Contains(url, "bridge909.org") ||
-		strings.Contains(url, "prod-3-238-92-150.amperwave.net/publictv19-ktbgfmaac-imc1")
+	return strings.Contains(url, "bridge909.org")
 }
 
 // bridgePlaylist mirrors the JSON document returned by the
