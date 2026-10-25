@@ -35,6 +35,10 @@ func Resolver(streamURL string) (fetch func(ctx context.Context) (string, error)
 		return func(ctx context.Context) (string, error) {
 			return fipNowPlaying(ctx, station, time.Now().Unix())
 		}, 15 * time.Second, true
+	case matchBridge(u):
+		return func(ctx context.Context) (string, error) {
+			return bridgeNowPlaying(ctx, u)
+		}, 30 * time.Second, true
 	}
 	return nil, 0, false
 }
@@ -116,6 +120,45 @@ func parseNTS(live *ntsLive, channel string) string {
 		return strings.TrimSpace(r.Now.BroadcastTitle)
 	}
 	return ""
+}
+
+// --- Bridge 90.9 -----------------------------------------------------------
+
+// matchBridge reports whether url is a Bridge 90.9 stream.
+func matchBridge(url string) bool {
+	return strings.Contains(url, "bridge909.org") ||
+		strings.Contains(url, "prod-3-238-92-150.amperwave.net/publictv19-ktbgfmaac-imc1")
+}
+
+// bridgePlaylist mirrors the JSON document returned by the
+// https://bridge909.org/api/playlist endpoint. The "songs" slice is ordered
+// most-recent-first: the first element is the currently playing or most
+// recently played track.
+type bridgePlaylist struct {
+	Songs []bridgeSong `json:"songs"`
+}
+
+type bridgeSong struct {
+	PlayedAt string `json:"played_at"`
+	Song     string `json:"song"`
+	Artist   string `json:"artist"`
+	Album    string `json:"album"`
+}
+
+func bridgeNowPlaying(ctx context.Context, _ string) (string, error) {
+	var playlist bridgePlaylist
+	if err := getJSON(ctx, "https://bridge909.org/api/playlist", &playlist); err != nil {
+		return "", err
+	}
+	return bridgeParse(&playlist), nil
+}
+
+func bridgeParse(playlist *bridgePlaylist) string {
+	if len(playlist.Songs) == 0 {
+		return ""
+	}
+	s := playlist.Songs[0]
+	return formatTrack(s.Artist, s.Song)
 }
 
 // --- FIP (Radio France) ----------------------------------------------------

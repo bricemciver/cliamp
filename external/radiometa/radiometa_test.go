@@ -25,6 +25,8 @@ func TestResolverMatching(t *testing.T) {
 		{"fip aac", "http://icecast.radiofrance.fr/fip-hifi.aac", true, 15 * time.Second},
 		{"fip jazz", "http://icecast.radiofrance.fr/fipjazz-hifi.aac", true, 15 * time.Second},
 		{"kexp aac", "https://kexp.streamguys1.com/kexp160.aac", false, 0},
+		{"bridge aac", "https://prod-3-238-92-150.amperwave.net/publictv19-ktbgfmaac-imc1", true, 30 * time.Second},
+		{"bridge domain", "https://bridge909.org/stream", true, 30 * time.Second},
 		{"local file", "/home/user/song.mp3", false, 0},
 		{"random http", "https://example.com/stream.mp3", false, 0},
 	}
@@ -146,6 +148,27 @@ func TestFormatTrack(t *testing.T) {
 		if got := formatTrack(tt.artist, tt.title); got != tt.want {
 			t.Errorf("formatTrack(%q, %q) = %q, want %q", tt.artist, tt.title, got, tt.want)
 		}
+	}
+}
+
+func TestParseBridge(t *testing.T) {
+	const payload = `{"songs":[
+		{"played_at":"October 25th at 3:46 pm","song":"Proud Mary","artist":"Ike & Tina Turner","album":"Workin' Together"},
+		{"played_at":"October 25th at 3:44 pm","song":"When We First Met","artist":"Twisted Teens","album":"The Holy Cross Tigers"}
+	]}`
+	var playlist bridgePlaylist
+	if err := json.Unmarshal([]byte(payload), &playlist); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got := bridgeParse(&playlist); got != "Ike & Tina Turner - Proud Mary" {
+		t.Errorf("first song = %q, want %q", got, "Ike & Tina Turner - Proud Mary")
+	}
+}
+
+func TestBridgeEmpty(t *testing.T) {
+	var playlist bridgePlaylist
+	if got := bridgeParse(&playlist); got != "" {
+		t.Errorf("empty playlist = %q, want empty", got)
 	}
 }
 
