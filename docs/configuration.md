@@ -83,10 +83,11 @@ eq = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 # YinYang koi chase each other across a wide strip, leaving on the right and
 # coming back on the left. Taller panels have them circle a lily pad whose
 # lotus follows recent bass levels, including after silence or time in the strip.
-# Ethereal draws Flame-style Braille pixels: drifting blue-violet clouds with
-# peach highlights and treble-reactive stars, leaving the background untouched.
+# Ethereal draws Flame-style Braille pixels: drifting clouds with bright
+# highlights and treble-reactive stars, leaving the background untouched.
 # Inspired by Omarchy's Ethereal cosmic wallpaper.
-# It keeps its own palette under any UI theme; Omarchy is not required.
+# It follows terminal colors by default and the selected UI theme.
+# Omarchy is not required.
 visualizer = "Bars"
 
 # Visualizer volume linking (default: true)
@@ -511,6 +512,8 @@ user_id = "your-account-user-id"
 
 After you enable NetEase, the provider shows liked songs, created playlists, saved playlists, and public charts. Use `Ctrl+F` to search. Playback uses `yt-dlp` with the same browser cookie source.
 
+If `yt-dlp` cannot read the browser cookies, for example with the DPAPI error on Windows, export the `music.163.com` cookies to a Netscape-format `cookies.txt` file and set `cookies_file = "/path/to/cookies.txt"` instead. See [netease.md](netease.md#cookies-file).
+
 ## Radio
 
 The Radio provider is always on. The `[radio]` block only tunes it:
@@ -540,7 +543,7 @@ name = "Ambient Radio"
 url = "https://ambient.example.com/stream.m3u"
 ```
 
-These stations appear with the built-in cliamp radio in the Radio provider.
+These stations appear with the built-in cliamp radio in the Radio provider. Each one needs its own `[[station]]` header. cliamp warns about any other section header in this file, such as `[[stations]]`, and skips the entries under it.
 
 See [audio-quality.md](audio-quality.md) for sample rate, buffer, bit depth, and resample quality settings.
 
@@ -569,7 +572,8 @@ WSLg must be active. `echo $PULSE_SERVER` should print a path. If it is empty, u
 
 ## ffmpeg (optional)
 
-AAC, ALAC (`.m4a`), Opus, and WMA playback require [ffmpeg](https://ffmpeg.org/):
+AAC, ALAC (`.m4a`), Opus, WMA, and the audio streams of `.mp4` and `.webm` files
+require [ffmpeg](https://ffmpeg.org/):
 
 ```sh
 # Arch
